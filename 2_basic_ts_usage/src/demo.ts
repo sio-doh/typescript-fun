@@ -1,21 +1,12 @@
 interface Contact {
     id: number;
-    name: ContactName;
-    birthDate?: Date; 
-    status: ContactStatus;
+    name: string; 
+    clone(name: string): Contact
 }
 
-enum ContactStatus {
-    Active = "active", 
-    Inactive = "inactive", 
-    New = "new"
+function clone(source: Contact): Contact {
+    return Object.apply({}, source);
 }
 
-let primaryContact: Contact = {
-    birthDate: new Date("01-01-1980"),
-    id: 12345,
-    name: "Jamie Johnson", 
-    status: ContactStatus.Active
-}
-
-type ContactName = string
+const a: Contact = { id: 123, name: "Homer Simpson" };
+const b = clone(a)
