@@ -1,7 +1,10 @@
+const x = "string"
+const y = true
+console.log(typeof x) // --> "string"
+console.log(typeof y) // --> "boolean"
+
 type ContactName = string;
-
 type ContactStatus = "active" | "inactive" | "new";
-
 type ContactBirthDate = Date | number | string;
 
 interface Contact {
@@ -11,30 +14,23 @@ interface Contact {
     status?: ContactStatus;
 }
 
-interface Address {
-    line1: string;
-    line2: string;
-    province: string;
-    region: string;
-    postalCode: string;
-}
-
-type AddressableContact = Contact & Address; 
-
-function getBirthDate(contact: Contact) {
-    if (typeof contact.birthDate === "number") {
-        return new Date(contact.birthDate)
-    }
-    else if (typeof contact.birthDate === "string") {
-        return Date.parse(contact.birthDate)
+function toContact(nameOrContact: string | Contact): Contact {
+    if (typeof nameOrContact === "object") {
+        return {
+            id: nameOrContact.id,
+            name: nameOrContact.name,
+            status: nameOrContact.status
+        }
     }
     else {
-        return contact.birthDate
+        return {
+            id: 0,
+            name: nameOrContact, 
+            status: "active"
+        }
     }
 }
 
-let primaryContact: Contact = {
-    id: 1234, 
-    name: "Jamie Johnson", 
-    status: "active"
-}
+const myType = { min: 1, max: 200 }
+
+function save(source: typeof myType) {}
