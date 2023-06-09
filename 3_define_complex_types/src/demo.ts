@@ -1,36 +1,48 @@
-const x = "string"
-const y = true
-console.log(typeof x) // --> "string"
-console.log(typeof y) // --> "boolean"
-
-type ContactName = string;
 type ContactStatus = "active" | "inactive" | "new";
-type ContactBirthDate = Date | number | string;
 
+interface Address {
+    street: string;
+    province: string;
+    postalCode: string;
+}
 interface Contact {
     id: number;
-    name: ContactName;
-    birthDate?: ContactBirthDate;
-    status?: ContactStatus;
+    name: string;
+    status: ContactStatus; 
+    address: Address;
 }
 
-function toContact(nameOrContact: string | Contact): Contact {
-    if (typeof nameOrContact === "object") {
-        return {
-            id: nameOrContact.id,
-            name: nameOrContact.name,
-            status: nameOrContact.status
-        }
-    }
-    else {
-        return {
-            id: 0,
-            name: nameOrContact, 
-            status: "active"
-        }
+type Awesome = Contact["address"]["postalCode"];
+
+interface ContactEvent {
+    contactId: Contact["id"];
+}
+
+interface ContactDeletedEvent extends ContactEvent {
+}
+
+interface ContactStatusChangedEvent extends ContactEvent {
+    oldStatus: Contact["id"];
+    newStatus: Contact["id"];
+}
+
+interface ContactEvents {
+    deleted: ContactDeletedEvent;
+    statusChanged: ContactStatusChangedEvent;
+    // ... and so on
+}
+
+function getValue<T, U extends keyof T>(source: T, propertyName: U) {
+    return source[propertyName];
+}
+
+function handleEvent<T extends keyof ContactEvents>(
+    eventName: T, 
+    handler: (evt: ContactEvents[T]) => void 
+) {
+    if (eventName === "statusChanged") {
+        handler({ contactId: 1, oldStatus: "active", newStatus: "inactive" })
     }
 }
 
-const myType = { min: 1, max: 200 }
-
-function save(source: typeof myType) {}
+handleEvent("statusChanged", evt => evt)
