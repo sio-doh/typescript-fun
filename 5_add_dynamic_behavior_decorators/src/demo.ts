@@ -13,17 +13,18 @@ const currentUser = {
     }
 }
 
-function authorize(target: any, property: string, descriptor: PropertyDescriptor) {
-    const wrapped = descriptor.value;
-    descriptor.value = function() {
-        if (!currentUser.isAuthenticated()) {
-            throw Error("User is not authenticated");
-        }
-        try {
+function authorize(role: string) {
+    return function authorizeDecorator(target: any, property: string, descriptor: PropertyDescriptor) {
+        const wrapped = descriptor.value;
+        
+        descriptor.value = function() {
+            if (!currentUser.isAuthenticated()) {
+                throw Error("User is not authenticated");
+            }
+            if (!currentUser.isInRole(role)) {
+                throw Error(`User not in role ${role}`);
+            }
             return wrapped.apply(this, arguments);
-        } catch(ex) {
-            // TODO: some fancy logging logic here
-            throw ex;
         }
     }
 }
@@ -33,10 +34,6 @@ class ContactRepository {
 
     @authorize("ContactViewer")
     getContactById(id: number): Contact | null {
-        if (!currentUser.isInRole("ContactViewer")) {
-            throw Error("User not authorized to execute this action");
-        }
-
         const contact = this.contacts.find(x => x.id === id);
         return contact;
     }
