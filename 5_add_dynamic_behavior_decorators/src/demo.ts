@@ -16,7 +16,7 @@ const currentUser = {
 function authorize(role: string) {
     return function authorizeDecorator(target: any, property: string, descriptor: PropertyDescriptor) {
         const wrapped = descriptor.value;
-        
+
         descriptor.value = function() {
             if (!currentUser.isAuthenticated()) {
                 throw Error("User is not authenticated");
@@ -29,8 +29,32 @@ function authorize(role: string) {
     }
 }
 
+function freeze(constructor: Function) { 
+    Object.freeze(constructor)
+    Object.freeze(constructor.prototype)
+}
+
+function singleton<T extends { new(...args: any[]): {} }>(constructor: T) {
+    return class Singleton extends constructor {
+        static _instance = null; 
+
+        constructor(...args) {
+            super(...args); 
+            if (Singleton._instance) {
+                throw Error("Duplicate instance")
+            }
+
+            Singleton._instance = this;
+        }
+    }
+}
+
+@freeze
+@singleton
 class ContactRepository {
-    private contacts: Contact[] = [];
+    private contacts: Contact[] = []; 
+
+    constructor() {}
 
     @authorize("ContactViewer")
     getContactById(id: number): Contact | null {
